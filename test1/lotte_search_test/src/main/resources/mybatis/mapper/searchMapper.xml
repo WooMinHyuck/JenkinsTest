@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.Mybatis">
+	
+	<!-- 사용자 아이디로 del_yn값이 'N'인 검색어, 인덱스 출력 -->
+	<select id="selectSearchByUserId" resultType="Map">
+		select search_idx, search_word from tn_user_keyword_history where user_id = #{userId} and del_yn = 'N'
+	</select>
+	
+	<select id="selectSearchByIdx" resultType="String">
+		select search_word from tn_user_keyword_history where search_idx = #{searchIdx}
+	</select>
+	
+	<insert id="insertSearch">
+		<selectKey keyProperty="searchIdx" resultType="integer" order="BEFORE">
+			select ifnull(max(search_idx), 0) + 1 from tn_user_keyword_history
+		</selectKey>
+		
+		insert into tn_user_keyword_history
+			(search_idx, user_id, search_word)
+		values
+			(#{searchIdx}, #{userId}, #{searchWord})
+	</insert>
+	
+	<update id="updateDelYN">
+		update tn_user_keyword_history 
+		set del_yn = 'Y' 
+		where search_idx = #{searchIdx}
+	</update>
+
+	<select id="discoverySearch" resultType="Map">
+		select idx, kor_title , eng_title , abstract , keyword , createMonth from tn_index_wmh
+	</select>
+
+	<delete id="discoveryDel">
+		delete 
+		from tn_index_wmh
+		where idx = #{idx}
+	</delete>
+	
+	<insert id ="discoveryInsert">
+		<selectKey keyProperty="Idx" resultType="integer" order="BEFORE">
+			select ifnull(max(idx), 0) + 1 from tn_index_wmh
+		</selectKey>
+		
+		insert into tn_index_wmh
+			(idx, kor_title, eng_title, abstract , keyword)
+		values
+			(#{Idx}, #{kor_title}, #{eng_title}, #{I_abstract}, #{I_keyword})
+	</insert>
+
+	<select id="discoveryMod" resultType="Map">
+		select * from tn_index_wmh where idx = #{Idx}
+	</select>
+
+	<update id="discoveryUpdate" parameterType="Map" >
+		<!-- update tn_index_wmh
+		set kor_title = #{kor_title} , eng_title = #{eng_title}, keyword = #{I_keyword}, abstract = #{I_abstract}
+		where idx = #{Idx} -->
+		update tn_index_wmh
+		<!-- set kor_title = {#kor_title} , eng_title = {#eng_title}, keyword = {#I_keyword}, abstract = {#I_abstract} -->
+		set kor_title = #{kor_title} , eng_title = #{eng_title}, keyword = #{I_keyword}, abstract = #{I_abstract}
+		where idx = #{Idx}
+	</update>
+
+
+</mapper>

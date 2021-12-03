@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- 외부 라이브러리는 root-context에 등록한다. -->
+	
+	<!-- <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
+		<property name="url" value="jdbc:mariadb://192.168.0.17:23306/TS_INNOGRUDB"/>
+		<property name="username" value="innogru"/>
+		<property name="password" value="inno180302!"/>
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	  <property name="dataSource" ref="dataSource" />
+	  <!-- <property name="configuration">
+	    <bean class="org.apache.ibatis.session.Configuration">
+	      <property name="mapUnderscoreToCamelCase" value="true"/>
+	    </bean>
+	  </property> -->
+	  <property name="configLocation" value="classpath:mybatis/config.xml"></property>
+	</bean>
+	
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+	  <constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- @Mapper 어노테이션이 등록된 인터페이스 매퍼를 찾아 스프링에 등록 -->
+	<!-- @annotation : 모든 인터페이스가 아닌 특정한 어노테이션만 mybatis가 스캔할 수 있도록 함. 이걸 안하면 proxy랑 꼬일 수도 있음. -->
+	<mybatis:scan base-package="kr.co.innogru" annotation="org.apache.ibatis.annotations.Mapper"/>
+	
+	<bean id="mailSenderImpl" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.naver.com"/>
+		<property name="username" value=""/>
+		<property name="password" value=""/>
+		<property name="port" value="465"/>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtp.ssl.enable">true</prop>
+				<prop key="mail.debug">true</prop> <!-- 메일이 잘 보내졌나 확인 -->
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxInMemorySize" value="10485760"/>
+		<property name="maxUploadSize" value="10485760"/>
+	</bean>
+	
+</beans>
